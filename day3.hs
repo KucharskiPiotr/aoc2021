@@ -40,3 +40,40 @@ main = do
   print epsilon
   print (gamma * epsilon)
   hClose handle
+
+bitSum :: String -> Int
+bitSum "" = 0
+bitSum (b:bs) = case b of
+  '0' -> bitSum bs
+  '1' -> 1 + bitSum bs
+  _ -> bitSum bs
+
+getOxygenRating :: Int -> [String] -> String
+getOxygenRating _ [result] = result
+getOxygenRating index numberStrings = do
+  let sum = bitSum $ map (!!index) numberStrings
+  getOxygenRating (index + 1) $ 
+    filter (\ns -> 
+      (sum >= (length numberStrings `div` 2) && ns !! index == '1') || 
+      (sum < (length numberStrings `div` 2) && ns !! index == '0')) numberStrings
+
+
+getCo2Rating :: Int -> [String] -> String
+getCo2Rating _ [result] = result
+getCo2Rating index numberStrings = do
+  let sum = bitSum $ map (!!index) numberStrings
+  getOxygenRating (index + 1) $ 
+    filter (\ns -> 
+      (sum >= (length numberStrings `div` 2) && ns !! index == '0') || 
+      (sum < (length numberStrings `div` 2) && ns !! index == '1')) numberStrings
+
+mainPart2 :: IO()
+mainPart2 = do
+  handle <- openFile "day3.txt" ReadMode 
+  contents <- hGetContents handle
+  let numberLines = lines contents
+  let res = getOxygenRating 0 numberLines
+  let co2 = getCo2Rating 0 numberLines
+  print res
+  print co2
+  hClose handle
